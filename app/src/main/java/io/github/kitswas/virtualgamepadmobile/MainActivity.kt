@@ -1,6 +1,7 @@
 package io.github.kitswas.virtualgamepadmobile
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -21,6 +22,7 @@ import io.github.kitswas.virtualgamepadmobile.data.SettingsRepository
 import io.github.kitswas.virtualgamepadmobile.data.defaultBaseColor
 import io.github.kitswas.virtualgamepadmobile.data.defaultColorScheme
 import io.github.kitswas.virtualgamepadmobile.data.defaultFullScreenEnabled
+import io.github.kitswas.virtualgamepadmobile.data.defaultKeepScreenOnEnabled
 import io.github.kitswas.virtualgamepadmobile.data.defaultHapticFeedbackEnabled
 import io.github.kitswas.virtualgamepadmobile.data.defaultSaveConnectionCredentials
 import io.github.kitswas.virtualgamepadmobile.network.ConnectionViewModel
@@ -90,6 +92,18 @@ class MainActivity : ComponentActivity() {
             } else {
                 WindowCompat.setDecorFitsSystemWindows(window, true)
                 insetsController.show(WindowInsetsCompat.Type.systemBars())
+            }
+        }
+
+        val keepScreenOnEnabled = settingsRepository.keepScreenOnEnabled.collectAsState(
+            initial = defaultKeepScreenOnEnabled
+        )
+
+        LaunchedEffect(keepScreenOnEnabled.value) {
+            if (keepScreenOnEnabled.value) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            } else {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
         }
 
