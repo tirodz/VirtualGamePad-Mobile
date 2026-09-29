@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,6 +48,7 @@ import io.github.kitswas.virtualgamepadmobile.data.SettingsRepository
 import io.github.kitswas.virtualgamepadmobile.data.defaultBaseColor
 import io.github.kitswas.virtualgamepadmobile.data.defaultColorScheme
 import io.github.kitswas.virtualgamepadmobile.data.defaultFullScreenEnabled
+import io.github.kitswas.virtualgamepadmobile.data.defaultKeepScreenOnEnabled
 import io.github.kitswas.virtualgamepadmobile.data.defaultHapticFeedbackEnabled
 import io.github.kitswas.virtualgamepadmobile.data.defaultPollingDelay
 import io.github.kitswas.virtualgamepadmobile.data.defaultSaveConnectionCredentials
@@ -66,7 +68,8 @@ private data class SettingsChanges(
     val pollingDelay: Int? = null,
     val hapticFeedbackEnabled: Boolean? = null,
     val saveConnectionCredentials: Boolean? = null,
-    val fullScreenEnabled: Boolean? = null
+    val fullScreenEnabled: Boolean? = null,
+    val keepScreenOnEnabled: Boolean? = null
 ) : Parcelable
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,6 +88,7 @@ fun SettingsScreen(
         val hapticEnabled by settingsRepository.hapticFeedbackEnabled.collectAsState(initial = defaultHapticFeedbackEnabled)
         val saveCredentials by settingsRepository.saveConnectionCredentials.collectAsState(initial = defaultSaveConnectionCredentials)
         val fullScreenEnabled by settingsRepository.fullScreenEnabled.collectAsState(initial = defaultFullScreenEnabled)
+        val keepScreenOnEnabled by settingsRepository.keepScreenOnEnabled.collectAsState(initial = defaultKeepScreenOnEnabled)
 
         Column(
             modifier = Modifier
@@ -209,6 +213,24 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Text(
+                        stringResource(R.string.settings_keep_screen_on),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Switch(
+                        modifier = Modifier.testTag("keepScreenOnSwitch"),
+                        checked = settingsChanges.keepScreenOnEnabled ?: keepScreenOnEnabled,
+                        onCheckedChange = {
+                            settingsChanges = settingsChanges.copy(keepScreenOnEnabled = it)
+                        }
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Text(
                         stringResource(R.string.settings_save_connection_credentials),
                         style = MaterialTheme.typography.labelMedium
                     )
@@ -273,6 +295,11 @@ fun SettingsScreen(
                             }
                             settingsChanges.fullScreenEnabled?.let {
                                 settingsRepository.setFullScreenEnabled(
+                                    it
+                                ); ++changesSaved
+                            }
+                            settingsChanges.keepScreenOnEnabled?.let {
+                                settingsRepository.setKeepScreenOnEnabled(
                                     it
                                 ); ++changesSaved
                             }
