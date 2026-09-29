@@ -61,14 +61,26 @@ class SettingsE2ETest {
         composeTestRule.onNodeWithTag("keepScreenOnSwitch").assertIsOn()
         composeTestRule.onNodeWithText(getString(R.string.save)).performClick()
 
+        composeTestRule.waitUntil(timeoutMillis = 3_000) {
+            composeTestRule.activity.window.attributes.flags and
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON != 0
+        }
+
         val flags = composeTestRule.activity.window.attributes.flags
         check(flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON != 0) {
             "FLAG_KEEP_SCREEN_ON was not set after enabling the setting"
         }
 
+        // Verify the value was persisted and is reflected when Settings is reopened.
         composeTestRule.onNodeWithText(getString(R.string.menu_settings)).performClick()
+        composeTestRule.onNodeWithTag("keepScreenOnSwitch").assertIsOn()
         composeTestRule.onNodeWithText(getString(R.string.reset)).performClick()
         composeTestRule.onNodeWithText(getString(R.string.save)).performClick()
+
+        composeTestRule.waitUntil(timeoutMillis = 3_000) {
+            composeTestRule.activity.window.attributes.flags and
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON == 0
+        }
 
         val resetFlags = composeTestRule.activity.window.attributes.flags
         check(resetFlags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON == 0) {
